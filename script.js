@@ -42,20 +42,16 @@ async function generateImage() {
     downloadContainer.classList.add('hidden');
     imageLoader.classList.remove('hidden');
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:generateContent?key=${apiKey}`;
+    // --- FIX 1: Changed endpoint from :generateContent to :predict ---
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
 
+    // --- FIX 2: Updated payload structure for the :predict method ---
     const payload = {
-        contents: [
-            {
-                parts: [
-                    {
-                        text: prompt
-                    }
-                ]
-            }
-        ],
-        generationConfig: {
-            "responseMimeType": "image/jpeg"
+        instances: {
+            prompt: prompt
+        },
+        parameters: {
+            "sampleCount": 1
         }
     };
 
@@ -78,7 +74,8 @@ async function generateImage() {
 
         const data = await response.json();
         
-        const imageData = data.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+        // --- FIX 3: Updated response parsing for the :predict method ---
+        const imageData = data.predictions?.[0]?.bytesBase64Encoded;
 
         if (imageData) {
             const imageUrl = `data:image/jpeg;base64,${imageData}`;
